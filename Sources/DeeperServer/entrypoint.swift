@@ -1,5 +1,5 @@
 //
-//  main.swift
+//  entrypoint.swift
 //  DeeperServer
 //
 //  HTTP API server that exposes Deeper analytics data as JSON endpoints.
@@ -31,10 +31,16 @@ enum DeeperServerApp {
         try LoggingSystem.bootstrap(from: &env)
 
         let app = try await Application.make(env)
-        defer { Task { try? await app.asyncShutdown() } }
 
-        try await configure(app)
-        try await app.execute()
+        do {
+            try await configure(app)
+            try await app.execute()
+        } catch {
+            app.logger.report(error: error)
+            try? await app.asyncShutdown()
+            throw error
+        }
+        try await app.asyncShutdown()
     }
 }
 

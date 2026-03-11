@@ -38,7 +38,8 @@ RUN apt-get update && \
         libxml2 \
         libtinfo6 \
         tzdata \
-        ca-certificates && \
+        ca-certificates \
+        curl && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
@@ -62,6 +63,6 @@ ENV PORT=8080 \
 EXPOSE 8080
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-    CMD curl -sf http://localhost:${PORT}/health || exit 1
+    CMD curl -sf http://localhost:8080/health || exit 1
 
 CMD ["./DeeperServer"]
