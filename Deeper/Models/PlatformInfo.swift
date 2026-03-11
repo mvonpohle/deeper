@@ -5,7 +5,9 @@
 //  Created by Fatih Kadir Akın on 22.02.2026.
 //
 
+#if canImport(SwiftUI)
 import SwiftUI
+#endif
 
 enum Platform: String, CaseIterable, Identifiable, Sendable, Hashable, Codable {
     case whatsapp
@@ -63,6 +65,7 @@ enum Platform: String, CaseIterable, Identifiable, Sendable, Hashable, Codable {
         }
     }
 
+#if canImport(SwiftUI)
     var color: Color {
         switch self {
         case .whatsapp: .green
@@ -81,6 +84,7 @@ enum Platform: String, CaseIterable, Identifiable, Sendable, Hashable, Codable {
         case .unknown: .gray
         }
     }
+#endif
 
     // Maps bridge keywords → Platform. Order matters: longer/more specific first.
     private static let bridgeKeywords: [(keyword: String, platform: Platform)] = [

@@ -6,6 +6,12 @@
 //
 
 import Foundation
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
+#if canImport(Observation)
+import Observation
+#endif
 
 @Observable
 final class BeeperAPIClient {

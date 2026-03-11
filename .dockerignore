@@ -1,0 +1,36 @@
+# .dockerignore
+# Excludes macOS-/Xcode-specific artefacts and build outputs from the Docker
+# build context so they don't slow down image builds or leak local state.
+
+# Xcode project and derived data
+*.xcodeproj/
+*.xcworkspace/
+DerivedData/
+*.xcuserstate
+
+# macOS metadata
+.DS_Store
+**/.DS_Store
+._*
+
+# Swift Package Manager local state (resolved versions are kept)
+.build/
+.swiftpm/
+
+# macOS app bundle build output
+build/
+
+# Documentation assets (not needed in the container)
+docs/
+icon.svg
+
+# Git history
+.git/
+
+# Local environment files (never bake secrets into the image)
+.env
+*.env.local
+
+# Editor files
+.vscode/
+*.swp
