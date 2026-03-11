@@ -1,0 +1,17 @@
+# Swift / Xcode build artefacts
+.build/
+DerivedData/
+*.xcuserstate
+xcuserdata/
+build/
+
+# macOS metadata
+.DS_Store
+**/.DS_Store
+
+# Swift Package Manager local state (Package.resolved is committed for reproducibility)
+.swiftpm/
+
+# Local environment secrets (never commit)
+.env
+*.env.local

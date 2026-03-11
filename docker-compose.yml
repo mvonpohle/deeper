@@ -1,0 +1,49 @@
+# docker-compose.yml for DeeperServer
+#
+# Runs the Deeper analytics server alongside Beeper Desktop.
+# Beeper Desktop must be running on the host machine (or accessible via the
+# network address configured in BEEPER_BASE_URL).
+#
+# Quick start:
+#   1. Copy .env.example to .env and fill in your BEEPER_TOKEN
+#   2. docker compose up --build
+#   3. Open http://localhost:8080/api/status in a browser to verify
+
+services:
+  deeper-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: deeper-server:latest
+    container_name: deeper-server
+    restart: unless-stopped
+    ports:
+      - "${PORT:-8080}:8080"
+    environment:
+      # Required: Bearer token obtained from Beeper Desktop
+      BEEPER_TOKEN: "${BEEPER_TOKEN}"
+      # URL of Beeper Desktop.
+      # - On Linux/Windows Docker: host.docker.internal resolves to the host machine.
+      # - On Linux without host.docker.internal, use the host's LAN IP instead.
+      BEEPER_BASE_URL: "${BEEPER_BASE_URL:-http://host.docker.internal:23373}"
+      # Limit messages fetched per chat to keep initial sync fast.
+      # Remove or set to 0 for unlimited (may take several minutes).
+      DEEPER_MESSAGE_LIMIT: "${DEEPER_MESSAGE_LIMIT:-500}"
+      PORT: "8080"
+      HOST: "0.0.0.0"
+    volumes:
+      # Persist the analytics cache across container restarts
+      - deeper-cache:/home/deeper/.cache/deeper_cache
+    extra_hosts:
+      # Ensures host.docker.internal resolves correctly on Linux hosts
+      - "host.docker.internal:host-gateway"
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 90s
+
+volumes:
+  deeper-cache:
+    driver: local

@@ -6,13 +6,16 @@
 //
 
 import Foundation
+#if canImport(Security)
 import Security
+#endif
 
 enum KeychainHelper {
     private static let service = "dev.fka.Deeper"
     private static let tokenKey = "beeper_access_token"
     private static let baseURLKey = "beeper_base_url"
 
+#if canImport(Security)
     static func saveToken(_ token: String) {
         guard let data = token.data(using: .utf8) else { return }
         let query: [String: Any] = [
@@ -49,13 +52,30 @@ enum KeychainHelper {
         ]
         SecItemDelete(query as CFDictionary)
     }
+#else
+    // Linux / non-Keychain fallback: read from environment variable.
+    // The token is never persisted to disk by KeychainHelper on this platform;
+    // callers should supply credentials via BEEPER_TOKEN / BEEPER_BASE_URL.
+    static func saveToken(_ token: String) {
+        // No persistent Keychain storage on this platform; no-op.
+    }
+
+    static func loadToken() -> String? {
+        ProcessInfo.processInfo.environment["BEEPER_TOKEN"]
+    }
+
+    static func deleteToken() {
+        // No persistent Keychain storage to clear on this platform; no-op.
+    }
+#endif
 
     static func saveBaseURL(_ baseURL: String) {
         UserDefaults.standard.set(baseURL, forKey: baseURLKey)
     }
 
     static func loadBaseURL() -> String? {
-        UserDefaults.standard.string(forKey: baseURLKey)
+        ProcessInfo.processInfo.environment["BEEPER_BASE_URL"]
+            ?? UserDefaults.standard.string(forKey: baseURLKey)
     }
 
     static func deleteBaseURL() {

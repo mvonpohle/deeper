@@ -7,7 +7,9 @@
 
 import SwiftUI
 import Charts
+#if canImport(FoundationModels)
 import FoundationModels
+#endif
 
 struct PersonDetailView: View {
     let person: MergedPerson
@@ -16,7 +18,9 @@ struct PersonDetailView: View {
     @State private var conversationSummary: String?
     @State private var isSummarizing = false
     @State private var summaryError: String?
+    #if canImport(FoundationModels)
     private var model: SystemLanguageModel { .default }
+    #endif
 
     var body: some View {
         ScrollView {
@@ -159,7 +163,9 @@ struct PersonDetailView: View {
                 .glassEffect(.regular, in: .rect(cornerRadius: 16))
 
                 // MARK: - Language Session
+                #if canImport(FoundationModels)
                 languageSessionSection
+                #endif
 
                 // MARK: - Per-Person Phrases
                 personPhrasesSection
@@ -167,12 +173,16 @@ struct PersonDetailView: View {
             .padding(24)
         }
         .onAppear {
+            #if canImport(FoundationModels)
             summarizeConversation()
+            #endif
         }
         .onChange(of: person) {
             conversationSummary = nil
             summaryError = nil
+            #if canImport(FoundationModels)
             summarizeConversation()
+            #endif
         }
     }
 
@@ -227,6 +237,7 @@ struct PersonDetailView: View {
 
     // MARK: - Language Session Section
 
+    #if canImport(FoundationModels)
     @State private var glowStops: [Gradient.Stop] = Self.randomGlowStops()
 
     private static func randomGlowStops() -> [Gradient.Stop] {
@@ -329,6 +340,7 @@ struct PersonDetailView: View {
             }
         }
     }
+    #endif
 
     // MARK: - Per-Person Phrases
 
@@ -392,6 +404,7 @@ struct PersonDetailView: View {
 
     // MARK: - LLM Summarization
 
+    #if canImport(FoundationModels)
     private func summarizeConversation() {
         guard case .available = model.availability else { return }
         let recentMsgs = store.recentConversation(person, limit: 50)
@@ -444,6 +457,7 @@ struct PersonDetailView: View {
             }
         }
     }
+    #endif
 
     func connectionColor(for type: ConnectionType) -> Color {
         switch type {

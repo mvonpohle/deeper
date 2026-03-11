@@ -6,6 +6,9 @@
 //
 
 import Foundation
+#if canImport(Observation)
+import Observation
+#endif
 
 @Observable
 final class DataStore {
@@ -60,6 +63,11 @@ final class DataStore {
     let api: BeeperAPIClient?
 
     var messageLimit: Int {
+        // Allow env var override (useful for Docker/server deployments)
+        if let envStr = ProcessInfo.processInfo.environment["DEEPER_MESSAGE_LIMIT"],
+           let envLimit = Int(envStr) {
+            return envLimit
+        }
         let stored = UserDefaults.standard.integer(forKey: "messageLimit")
         if stored == 0 { return Int.max }
         return stored > 0 ? stored : 200
@@ -73,8 +81,9 @@ final class DataStore {
     // MARK: - Cache (split into multiple files)
 
     private static var cacheDir: URL {
-        let dir = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first!
-            .appendingPathComponent("deeper_cache", isDirectory: true)
+        let base = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first
+            ?? URL(fileURLWithPath: (ProcessInfo.processInfo.environment["HOME"] ?? "/tmp") + "/.cache")
+        let dir = base.appendingPathComponent("deeper_cache", isDirectory: true)
         try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
         return dir
     }
@@ -82,8 +91,9 @@ final class DataStore {
     static func clearCache() {
         try? FileManager.default.removeItem(at: cacheDir)
         // Also remove legacy single file
-        let legacy = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first!
-            .appendingPathComponent("deeper_data_cache.json")
+        let legacyBase = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first
+            ?? URL(fileURLWithPath: (ProcessInfo.processInfo.environment["HOME"] ?? "/tmp") + "/.cache")
+        let legacy = legacyBase.appendingPathComponent("deeper_data_cache.json")
         try? FileManager.default.removeItem(at: legacy)
     }
 
